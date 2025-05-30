@@ -1,0 +1,17 @@
+Discord Bot Wissensdatenbank
+==============================
+
+Was ist ein Discord Bot?
+Ein Discord Bot ist ein automatisiertes Programm, das in Discord-Servern verschiedene Aufgaben ausführen kann. Bots können Nachrichten senden, auf Befehle reagieren, Musik abspielen und vieles mehr.
+
+Wie funktioniert Künstliche Intelligenz?
+Künstliche Intelligenz (KI) ist ein Bereich der Informatik, der darauf abzielt, Maschinen zu entwickeln, die Aufgaben ausführen können, die normalerweise menschliche Intelligenz erfordern. Dazu gehören Lernen, Problemlösung und Spracherkennung.
+
+Google Gemini API
+Google Gemini ist ein fortschrittliches KI-Modell von Google, das für verschiedene Aufgaben wie Textgenerierung, Übersetzung und Fragenbeantwortung verwendet werden kann. Es kann komplexe Texte verstehen und darauf basierend intelligente Antworten generieren.
+
+Python Programmierung
+Python ist eine beliebte Programmiersprache, die für ihre einfache Syntax und Vielseitigkeit bekannt ist. Sie wird häufig für Webentwicklung, Datenanalyse, KI und Automatisierung verwendet.
+
+Discord.py Bibliothek
+Discord.py ist eine Python-Bibliothek, die es Entwicklern ermöglicht, Discord-Bots zu erstellen. Sie bietet eine einfache Schnittstelle zur Discord-API und unterstützt verschiedene Bot-Funktionen wie Befehle, Events und Nachrichten-Handling.

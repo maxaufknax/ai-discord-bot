@@ -1,0 +1,53 @@
+SCALING TO $30K-$50K PER DAY - EDDIE'S BLUEPRINT
+
+PREREQUISITES:
+- Product already selling profitably
+- Complete marketing funnel (retargeting, optimized offer, email/SMS sequences)
+- Bundles/upsells/post-purchase upsells
+
+1. SETTING UP THE BASE:
+- Start scaling within first 2-4 days of profitable ads
+- Continuously spread horizontally in ABO test campaign daily
+- Duplicate profitable ad sets with similar audiences at midnight
+- Give yourself best chance of finding new profitable ad sets
+
+2. PICK THE RIGHT AUDIENCES:
+CRITERIA FOR SCALING:
+- Consistently above 2.5 ROAS / 30% profit margin
+- 3-6 day performance window
+- Total spend of $60-120 USD
+- Break even ROAS assumption: 1.5
+
+EXAMPLE ANALYSIS:
+✅ Ad Set 3: $60 spent, $155 made (2.58 ROAS) - SCALABLE
+✅ Ad Set 5: $120 spent, $370 made (3.0 ROAS) - SCALABLE  
+✅ Ad Set 7: $80 spent, $250 made (3.5 ROAS) - SCALABLE
+❌ Ad Set 1: $60 spent, $80 made (1.3 ROAS) - NOT READY
+
+EDDIE'S CALCULATED RISK STRATEGY:
+Only scale 2 out of 3 qualified ad sets. If tomorrow is bad day, scaling all 3 could result in losses. Take calculated risks only.
+
+3. SMOOTH SCALING:
+- Put each winning audience in own single-ad-set CBO
+- Start at $100/day (or $200/day if ROAS was above 5-6)
+- Schedule to start at midnight
+- Keep original ABOs running if profitable
+
+4. MORE GASOLINE (Budget Increases):
+DAY 2 DECISIONS:
+- Don't touch CBOs if profitable on first day
+- If CBO has above 2.5 ROAS at 6-7 AM (ad account time), raise budget by $100
+- Monitor for 3-4 hours, if still profitable, raise another $100
+- Continue every ~4 hours until you feel resistance
+- Sweet spot: 1-4 budget increases per day
+
+EDDIE'S GOLDEN RULES:
+- NEVER increase budgets at midnight
+- Only increase when algorithm sends good quality traffic
+- Watch for spending pace resistance
+- If CBO spends $100-120 extremely unprofitably at any point, turn it off
+
+ADVANCED AUDIENCE TESTING:
+- After 2-3K events, test lookalike audiences (95% video views, FB/IG engagement)
+- Test broad demographic targeting (no interests) after $2-3K spend
+- Continue finding new winners daily

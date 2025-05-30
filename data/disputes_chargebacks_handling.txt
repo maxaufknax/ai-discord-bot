@@ -1,0 +1,40 @@
+DISPUTES & CHARGEBACKS - EDDIE'S BATTLE PLAN
+
+PREVENTION STRATEGIES:
+1. TRANSPARENCY - Be honest about shipping times & product benefits
+2. CUSTOMER SUPPORT - Multiple contact points, prompt responses
+3. THANK YOU CARDS - Include support email in packages to reduce bank complaints
+
+STRIPE DISPUTE HANDLING:
+- $15 penalty fee whether you win or lose
+- Bank makes final decision (usually sides with customer)
+- About 1 month to respond
+
+DISPUTE RESPONSE STRATEGY:
+1. Contact customer first - offer solution before submitting evidence
+2. Check tracking numbers vs customer claims
+3. Screenshot email conversations as proof
+4. Send "sneaky follow-up" email for dispute evidence
+
+COMMON DISPUTE REASONS & RESPONSES:
+
+A) PRODUCT NOT RECEIVED:
+Evidence: "Our customer ordered a Posture corrector with adjustable straps. The order was safely delivered (within the advertised time window) by USPS on the 27th of April to the address our customer provided on their order. Tracking #: 120840285203939558. Our return policy lasts 14 days from the date of delivery (which was a long time ago). This order is not eligible for a return anymore."
+
+B) UNAUTHORIZED CHARGE:
+- Show order confirmation email
+- Provide IP address match
+- Include shipping address confirmation
+
+C) PRODUCT SIGNIFICANTLY DIFFERENT:
+- Highlight exact product description from store
+- Show customer agreed to terms at checkout
+- Reference return policy timeframe
+
+TURN-OFF RULES:
+- If customer threatens chargeback, refund them immediately
+- Calculate: losing money to refunds vs losing to chargebacks + fees
+- Too many chargebacks = payment processor ban
+
+EDDIE'S HARSH TRUTH:
+Banks side with customers most of the time. This is just the ugly game we play. Focus on prevention more than winning disputes.
