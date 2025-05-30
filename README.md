@@ -1,6 +1,6 @@
-# Eddie from Mavenport - Discord Bot
+# Custom AI - Discord Bot
 
-A sophisticated Discord bot powered by Google Gemini AI, featuring Eddie from Mavenport's authentic personality and extensive dropshipping knowledge.
+A sophisticated Discord bot powered by Google Gemini AI. In This Branch featuring Eddie from Mavenport's authentic personality and extensive dropshipping knowledge.
 
 ## Features
 
