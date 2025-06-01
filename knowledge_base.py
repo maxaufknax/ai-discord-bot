@@ -17,7 +17,7 @@ class KnowledgeBase:
     Verwaltet die Wissensdatenbank aus PDF- und Text-Dateien
     """
     
-    def __init__(self, data_folder: str = "data"):
+    def __init__(self, data_folder: str = "user_knowledge"):
         self.data_folder = Path(data_folder)
         self.loaded_content: Dict[str, str] = {}
         self.supported_extensions = {'.txt', '.pdf', '.md'}

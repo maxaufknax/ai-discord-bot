@@ -1,71 +1,86 @@
-# Custom AI - Discord Bot
+# General Purpose AI Discord Bot
 
-A sophisticated Discord bot powered by Google Gemini AI. In This Branch featuring Eddie from Mavenport's authentic personality and extensive dropshipping knowledge.
+A flexible and user-friendly Discord bot powered by Google Gemini AI, designed to be run locally. It can be configured with your own API keys and an optional custom knowledge base.
 
 ## Features
 
-- **Eddie's Authentic Personality**: Direct, no-bullshit responses like the real Eddie
-- **Comprehensive Knowledge Base**: 23 files covering dropshipping, Facebook ads, customer support
-- **Multi-language Support**: Automatically detects and responds in German or English
-- **Context Management**: Remembers conversation history for better responses
-- **Image Analysis**: Analyzes screenshots of stores, ads, and metrics with Eddie's expertise
-- **Advanced Commands**: `!frage`, `!info`, `!themen`, and @mentions
+- **Conversational AI**: Engage in natural conversations, answer questions, and assist with various tasks using Google Gemini.
+- **Customizable Knowledge Base**: Enhance the bot's responses by providing your own knowledge base. Simply point the bot to a directory containing your `.txt`, `.pdf`, or `.md` files.
+- **Image Analysis**: The bot can analyze and discuss images you upload in the chat when you mention it.
+- **Context Management**: Remembers the flow of conversation for more relevant and coherent responses.
+- **Multi-language Support**: Automatically detects and responds in German or English (can be extended).
+- **User-Friendly GUI**: A simple desktop interface allows for easy configuration of API keys, knowledge base directory, and starting/stopping the bot.
+- **Local Execution**: Runs on your own machine, giving you full control.
 
-## Setup
+## Prerequisites
 
-### Prerequisites
-- Python 3.11+
+- Python 3.9+ (Python 3.11+ recommended)
 - Discord Bot Token
 - Google Gemini API Key
 
-### Installation
+## Installation
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   pip install discord.py python-dotenv google-generativeai PyMuPDF beautifulsoup4 aiohttp
-   ```
+1.  **Clone the Repository:**
+    ```bash
+    git clone <repository_url>
+    cd <repository_directory>
+    ```
+    (Replace `<repository_url>` and `<repository_directory>` with actual values)
 
-3. Set environment variables:
-   ```
-   DISCORD_TOKEN=your_discord_bot_token
-   GEMINI_API_KEY=your_gemini_api_key
-   ```
+2.  **Install Dependencies:**
+    It's recommended to use a virtual environment.
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    pip install discord.py google-generativeai PyMuPDF aiohttp
+    ```
 
-4. Run the bot:
-   ```bash
-   python enhanced_bot.py
-   ```
+## Configuration and Running the Bot
 
-## Knowledge Areas
+The bot is configured and controlled using a simple graphical user interface (GUI).
 
-- Facebook advertising and scaling strategies
-- Product research and sourcing
-- Store optimization and conversion tactics
-- Customer support and dispute handling
-- TikTok marketing and organic growth
-- Content creation and UGC strategies
-- Gray-hat methods and controversial tactics
+1.  **Launch the GUI:**
+    ```bash
+    python bot_gui.py
+    ```
+    Ensure you are in the bot's root directory where `bot_gui.py` is located.
 
-## Eddie's Teaching Style
+2.  **Configure Settings via GUI:**
+    *   **Discord Token**: Enter your Discord bot token.
+    *   **Gemini API Key**: Enter your Google Gemini API key.
+    *   **Knowledge Base Directory (Optional)**:
+        *   Click "Browse..." to select a folder containing your custom knowledge files (`.txt`, `.pdf`, `.md`).
+        *   If left empty or not specified in `config.json` (e.g., by deleting the line or on first run before saving), the bot will default to looking for a folder named `user_knowledge/` in its root directory. This directory will be created if it doesn't exist. If this folder is empty, the bot will run without a custom knowledge base, relying solely on its general AI capabilities.
+    *   **Save Configuration**: Click "Save Configuration". This will create/update a `config.json` file in the bot's directory with your settings.
 
-- Direct and authentic communication
-- Sometimes blunt when addressing basic questions
-- Calls community members "hustlers"
-- Zero patience for quick-money schemes without work
-- Proud of practical, results-driven methods
+3.  **Start/Stop the Bot:**
+    *   Click "Start Bot" in the GUI to run the bot. Status and logs (including output from `enhanced_bot.py`) will appear in the GUI.
+    *   Click "Stop Bot" to shut down the bot.
 
-## Commands
+## Using the Bot on Discord
 
-- `!frage [question]` - Ask Eddie anything about e-commerce
-- `!info` - View bot information and capabilities
-- `!themen` - See available knowledge topics
-- `@Eddie [message]` - Direct mention for questions or image analysis
+Once the bot is running and connected to your server:
 
-## Deployment
+-   **Ask Questions**:
+    -   Type `!frage [your question]`
+    -   Or simply mention the bot with your question (e.g., `@YourBotName what is the capital of France?`).
+-   **Image Analysis**: Upload an image and mention the bot in the comment (e.g., `@YourBotName describe this image`).
+-   **Bot Information**:
+    -   `!info`: Shows information about the bot, including loaded knowledge base files (if any) and the directory being used.
+-   **Bot Capabilities**:
+    -   `!themen`: Lists the general capabilities of the bot.
 
-This bot is designed to run on Replit with automatic hosting and scaling.
+## Preparing a Custom Knowledge Base (Optional)
+
+1.  Create a folder on your computer (e.g., `my_bot_knowledge`, or use the default `user_knowledge/` which will be created in the bot's directory if not specified otherwise).
+2.  Place your knowledge files into this folder. Supported formats are:
+    *   `.txt` (plain text files, UTF-8 encoding recommended)
+    *   `.pdf` (PDF documents)
+    *   `.md` (Markdown files)
+3.  In the GUI, set this folder as your "Knowledge Base Directory" and save the configuration.
+4.  When the bot starts, it will attempt to load and process these files from the specified directory.
+
+The bot will then use the information from these files to provide more specific and context-aware answers.
 
 ---
-
-Created by Eddie from Mavenport - Teaching real dropshipping strategies that actually work.
+This project aims to provide a general, locally-runnable, and easily configurable AI Discord bot.

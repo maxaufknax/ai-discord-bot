@@ -11,6 +11,7 @@ import discord
 from discord.ext import commands
 import google.generativeai as genai
 import os
+import json
 import logging
 import asyncio
 import aiohttp
@@ -23,6 +24,9 @@ from text_chunker import TextChunker
 # Logging konfigurieren
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Global variable for configuration
+CONFIG_DETAILS = {}
 
 # Bot Setup
 intents = discord.Intents.default()
@@ -48,33 +52,46 @@ MAX_CONTEXT_MESSAGES = 15
 @bot.event
 async def on_ready():
     """Bot ist bereit"""
-    global knowledge_base, text_chunker, gemini_model, gemini_vision_model
+    global knowledge_base, text_chunker, gemini_model, gemini_vision_model, CONFIG_DETAILS
     
     logger.info(f'🤖 Bot {bot.user} ist online!')
     
     # Setup Gemini API
     try:
-        api_key = os.getenv('GEMINI_API_KEY')
+        api_key = CONFIG_DETAILS.get('GEMINI_API_KEY')
         if not api_key:
-            logger.error("GEMINI_API_KEY nicht gefunden!")
-            return
+            logger.error("❌ GEMINI_API_KEY not found in config.json or environment!")
+            # Allow bot to start, but Gemini features will fail.
+            # This is handled by subsequent checks for gemini_model.
+            return # Or raise an error if Gemini is critical for startup
         
         genai.configure(api_key=api_key)
         gemini_model = genai.GenerativeModel('gemini-1.5-pro-latest')
         gemini_vision_model = genai.GenerativeModel('gemini-1.5-pro-latest')
-        logger.info("✅ Gemini Pro + Vision konfiguriert")
+        logger.info("✅ Gemini Pro + Vision configured using key from config.json.")
     except Exception as e:
         logger.error(f"Gemini API Fehler: {e}")
+        # Bot will continue running, but Gemini features will not work.
         return
     
     # Wissensdatenbank laden
     try:
-        knowledge_base = KnowledgeBase()
-        text_chunker = TextChunker()
+        # global CONFIG_DETAILS is already specified for on_ready
+        knowledge_dir_from_config = CONFIG_DETAILS.get('KNOWLEDGE_BASE_DIR')
+
+        if knowledge_dir_from_config:
+            logger.info(f"📚 Using custom knowledge base directory: {knowledge_dir_from_config}")
+            knowledge_base = KnowledgeBase(data_folder=knowledge_dir_from_config)
+        else:
+            logger.info("📚 Using default knowledge base directory 'user_knowledge/'.")
+            knowledge_base = KnowledgeBase() # Uses the new default "user_knowledge"
+
+        text_chunker = TextChunker() # Assuming TextChunker doesn't need path
         await knowledge_base.load_knowledge_base()
         
+        # Update the log message to reflect the actual path used by knowledge_base instance
         file_count = len(knowledge_base.get_loaded_files())
-        logger.info(f"✅ {file_count} Wissensdateien geladen")
+        logger.info(f"✅ {file_count} Wissensdateien geladen aus '{knowledge_base.data_folder}'")
         
         # Bot Status setzen
         await bot.change_presence(
@@ -160,31 +177,22 @@ async def analyze_image_with_context(image_data, question, context):
         if relevant_chunks:
             knowledge_context = f"\nRELEVANTES FACHWISSEN:\n{chr(10).join(relevant_chunks[:3])}"
         
-        prompt = f"""Du bist Eddie von Mavenport - der direkte, kompromisslose Dropshipping-Experte. Du hast Millionen mit E-Commerce verdient und lehrst deine "Hustlers" in der Mavenport Community.
+        prompt = f'''You are a helpful AI assistant. Analyze the provided image based on the user's question and the conversation context.
 
+CONVERSATION CONTEXT:
 {context}
 
-FRAGE/KONTEXT: {question}
+USER'S QUESTION/REQUEST: {question}
 {knowledge_context}
 
-EDDIE'S PERSÖNLICHKEIT:
-- Direkt und authentisch - sagst es wie es ist
-- Manchmal hart wenn Leute dumme Sachen machen
-- Nennst deine Community "Hustlers"
-- Hast keine Geduld für faule Ausreden oder Quick-Money-Träumer
-- Verwendest gelegentlich starke Sprache um Punkte zu machen
-- Stolz auf deine Gray-Hat Methoden und kontroversen Strategien
-- Erwartest dass Leute umsetzen was du lehrst
+IMAGE ANALYSIS INSTRUCTIONS:
+- Objectively describe the image.
+- If the user asks a specific question about the image, answer it to the best of your ability.
+- If custom knowledge is available and relevant, use it to inform your analysis.
+- Maintain a helpful and neutral tone.
 
-BILDANALYSE WIE EDDIE:
-- Sag direkt was Scheiße ist und was gut funktioniert
-- Bei Store-Screenshots: brutale UX/Design-Kritik mit klaren Fixes
-- Bei Ad-Creatives: schonungslose Bewertung von Hook, Zielgruppe, CTA
-- Bei Metriken: knallharte Interpretation - was skalieren, was killen
-- Bei Produkten: ob es sich verkauft oder Müll ist
-- Wenn es nicht E-Commerce/Dropshipping ist: "Das ist nicht mein Ding, ich mache Dropshipping und Facebook Ads"
-
-Antworte wie Eddie - direkt, ohne Beschönigung, mit echter Expertise. Verwende "Hustler" wenn du die Person ansprichst."""
+Respond clearly and concisely.
+'''
 
         # Erstelle Bild-Teil für Gemini
         image_part = {
@@ -251,15 +259,15 @@ async def handle_question_with_context(ctx, question):
                 
                 if is_english:
                     greeting_responses = [
-                        "What's up! Eddie here. What do you need help with? I teach dropshipping, Facebook ads, and how to actually make money online.",
-                        "Hey there, hustler. I'm here to help you scale your business. What's your question about e-commerce?",
-                        "Hello. I'm Eddie from Mavenport. Let's talk business - what do you want to know about dropshipping or Facebook ads?"
+                        "Hello! How can I assist you today?",
+                        "Hi there! What can I help you with?",
+                        "Greetings! I'm here to help. What's your question?"
                     ]
                 else:
                     greeting_responses = [
-                        "Was geht ab! Eddie hier. Womit kann ich dir helfen? Ich lehre Dropshipping, Facebook Ads und wie man richtig Geld online verdient.",
-                        "Hey Hustler. Ich bin hier um dir beim Skalieren zu helfen. Was ist deine Frage zum E-Commerce?",
-                        "Hallo. Ich bin Eddie von Mavenport. Lass uns über Business reden - was willst du über Dropshipping oder Facebook Ads wissen?"
+                        "Hallo! Wie kann ich Ihnen heute behilflich sein?",
+                        "Hallo! Womit kann ich Ihnen helfen?",
+                        "Guten Tag! Ich bin hier, um zu helfen. Was ist Ihre Frage?"
                     ]
                 
                 import random
@@ -274,61 +282,39 @@ async def handle_question_with_context(ctx, question):
             is_english = any(word in question.lower() for word in ['what', 'how', 'when', 'why', 'where', 'can', 'could', 'would', 'should', 'do', 'does', 'did', 'will', 'are', 'is', 'the', 'and', 'or', 'but'])
             
             if is_english:
-                prompt = f"""You are Eddie from Mavenport - the straight-talking, no-bullshit dropshipping expert who built one of the most successful e-commerce communities and made millions in dropshipping.
-
-EDDIE'S PERSONALITY:
-- Direct and authentic - you tell it like it is
-- Sometimes blunt or harsh when people ask stupid questions or don't read your materials
-- Call your community members "hustlers"
-- Zero patience for people who want quick money without work
-- Occasionally use strong language when making a point
-- Proud of your gray-hat methods and controversial strategies
-- Expect people to actually implement what you teach
-- Call out lazy thinking and bad strategies
+                prompt = f'''You are a helpful AI assistant.
 
 CONVERSATION CONTEXT:
 {context}
 
-YOUR MAVENPORT KNOWLEDGE:
+AVAILABLE KNOWLEDGE (if any):
 {combined_knowledge}
 
 CURRENT QUESTION: {question}
 
 INSTRUCTIONS:
-- Respond like Eddie would - be direct, actionable, don't sugarcoat
-- If someone asks something basic covered in your materials, call them out for not reading
-- If it's outside dropshipping/e-commerce, tell them that's not your thing
-- Give real, practical advice based on your actual experience
-- Use "hustler" when addressing the person
-- If they're asking good questions, be helpful but still direct"""
+- Answer the user's question directly and clearly.
+- Use the provided knowledge if it's relevant to the question.
+- If the question is outside your capabilities or knowledge, politely say so.
+- Maintain a neutral and helpful tone.
+- Respond in the language of the current question (English).'''
             else:
-                prompt = f"""Du bist Eddie von Mavenport - der direkte, kompromisslose Dropshipping-Experte der eine der erfolgreichsten E-Commerce Communities aufgebaut und Millionen mit Dropshipping verdient hat.
-
-EDDIE'S PERSÖNLICHKEIT:
-- Direkt und authentisch - sagst es wie es ist
-- Manchmal hart oder rau wenn Leute dumme Fragen stellen oder deine Materialien nicht lesen
-- Nennst deine Community-Mitglieder "Hustlers"
-- Null Geduld für Leute die schnelles Geld ohne Arbeit wollen
-- Verwendest gelegentlich starke Sprache um Punkte zu machen
-- Stolz auf deine Gray-Hat Methoden und kontroversen Strategien
-- Erwartest dass Leute tatsächlich umsetzen was du lehrst
-- Konfrontierst faules Denken und schlechte Strategien
+                prompt = f'''Sie sind ein hilfreicher KI-Assistent.
 
 GESPRÄCHSKONTEXT:
 {context}
 
-DEIN MAVENPORT WISSEN:
+VERFÜGBARES WISSEN (falls vorhanden):
 {combined_knowledge}
 
 AKTUELLE FRAGE: {question}
 
 ANWEISUNGEN:
-- Antworte wie Eddie es würde - direkt, umsetzbar, ohne Beschönigung
-- Wenn jemand etwas Grundlegendes fragt was in deinen Materialien steht, konfrontiere sie damit
-- Wenn es außerhalb Dropshipping/E-Commerce liegt, sag dass das nicht dein Ding ist
-- Gib echte, praktische Ratschläge basierend auf deiner tatsächlichen Erfahrung
-- Verwende "Hustler" wenn du die Person ansprichst
-- Wenn sie gute Fragen stellen, sei hilfreich aber trotzdem direkt"""
+- Beantworten Sie die Frage des Benutzers direkt und klar.
+- Nutzen Sie das bereitgestellte Wissen, wenn es für die Frage relevant ist.
+- Wenn die Frage außerhalb Ihrer Fähigkeiten oder Ihres Wissens liegt, teilen Sie dies höflich mit.
+- Behalten Sie einen neutralen und hilfsbereiten Ton bei.
+- Antworten Sie in der Sprache der aktuellen Frage (Deutsch).'''
 
             # Gemini API Anfrage
             response = gemini_model.generate_content(prompt)
@@ -351,19 +337,24 @@ async def info_command(ctx):
         if knowledge_base:
             files = knowledge_base.get_loaded_files()
             file_count = len(files)
-            stats = knowledge_base.get_content_stats()
+            stats = knowledge_base.get_content_stats() # This line might be problematic if file_count is 0, ensure kb_value logic handles this
             
             embed = discord.Embed(
-                title="🤖 Eddie from Mavenport - Bot Information",
-                description="The straight-talking dropshipping expert teaching real E-Commerce strategies",
+                title="🤖 General AI Bot - Information",
+                description="A helpful AI assistant powered by Google Gemini.",
                 color=0x00ff00
             )
             
-            embed.add_field(
-                name="📚 Wissensdatenbank",
-                value=f"{file_count} Dateien\n{stats.get('total_characters', 0):,} Zeichen",
-                inline=True
-            )
+            # Wissensdatenbank field
+            if knowledge_base and knowledge_base.get_loaded_files():
+                file_count = len(knowledge_base.get_loaded_files())
+                # stats already defined if knowledge_base is true, but might be empty if no files.
+                # get_content_stats() should ideally handle empty content gracefully.
+                stats = knowledge_base.get_content_stats() # Re-fetch or ensure it's correctly scoped
+                kb_value = f"{file_count} Dateien geladen aus '{knowledge_base.data_folder}'.\n{stats.get('total_characters', 0):,} Zeichen.\n(Nutzerkonfigurierbar)"
+            else:
+                kb_value = "Keine Wissensdatenbank geladen.\n(Verzeichnis über GUI konfigurierbar)"
+            embed.add_field(name="📚 Wissensdatenbank", value=kb_value, inline=True)
             
             embed.add_field(
                 name="🧠 KI-Fähigkeiten",
@@ -372,14 +363,14 @@ async def info_command(ctx):
             )
             
             embed.add_field(
-                name="💡 Neue Features",
-                value="• Chatübergreifender Kontext\n• Bildanalyse\n• @-Erwähnungen\n• Intelligente Antworten",
+                name="💡 Features", # Renamed from "Neue Features"
+                value="• Kontext-Management\n• Bildanalyse (allgemein)\n• Unterstützung für @-Erwähnungen\n• Laden von benutzerdefiniertem Wissen",
                 inline=False
             )
             
             embed.add_field(
                 name="🔧 Befehle",
-                value="`!frage [text]` - Frage mit Kontext\n`!themen` - Verfügbare Themen\n`@Bot + Nachricht` - Direktansprache",
+                value="`!frage [text]` - Stelle eine Frage\n`!info` - Bot Informationen\n`!themen` - Bot Fähigkeiten\n`@Bot + Nachricht` - Direkte Ansprache",
                 inline=False
             )
             
@@ -396,30 +387,26 @@ async def themen_command(ctx):
     """Zeigt verfügbare Wissensthemen"""
     try:
         embed = discord.Embed(
-            title="📚 Verfügbare Wissensthemen",
-            description="Ich kann dir bei folgenden Themen helfen:",
+            title="📚 Bot Capabilities",
+            description="Ich kann Ihnen bei Folgendem helfen:",
             color=0x0099ff
         )
         
         topics = [
-            "📈 **Facebook Ads Optimierung**\nTesting, Scaling, Metriken, ROAS",
-            "🛍️ **Dropshipping Strategien**\nProduktrecherche, Supplier, Profit-Margins",
-            "🏪 **Shopify Store Setup**\nThemes, Metafields, Conversion-Optimierung", 
-            "🎯 **Content Creation**\nVideo-Ads, Copywriting, Creative-Strategien",
-            "📊 **Performance Tracking**\nUTM-Parameter, Analytics, KPI-Monitoring",
-            "💰 **Scaling Strategien**\nBudget-Management, Account-Struktur, CBO",
-            "🖼️ **Bildanalyse**\nStore-Screenshots, Ad-Creatives, Metriken",
-            "🔧 **Tools & Resources**\nSoftware, Extensions, Automatisierung"
+           "💬 Beantwortung Ihrer Fragen (mit oder ohne benutzerdefinierte Wissensdatenbank).",
+           "🖼️ Analyse von Bildern, die Sie hochladen.",
+           "🗣️ Verstehen und Antworten in Deutsch und Englisch.",
+           "🧠 Erinnerung an den Kontext unserer aktuellen Unterhaltung."
         ]
         
         for i, topic in enumerate(topics, 1):
             embed.add_field(
-                name=f"{i}.",
+                name=f"{i}.", # Keeping the numbering for structure
                 value=topic,
                 inline=False
             )
         
-        embed.set_footer(text="Erwähne mich mit @ oder stelle direkte Fragen!")
+        embed.set_footer(text="Erwähnen Sie mich mit @ oder verwenden Sie !frage.")
         await ctx.send(embed=embed)
         
     except Exception as e:
@@ -531,15 +518,15 @@ async def handle_auto_question_with_context(message, question):
                 
                 if is_english:
                     greeting_responses = [
-                        "Hello! I'm doing well, thank you for asking. How can I help you with e-commerce topics?",
-                        "Hi! Everything's running smoothly. What questions do you have about dropshipping, Facebook ads, or store optimization?",
-                        "Hello! I'm doing great. What can I assist you with in the e-commerce space?"
+                        "Hello! I'm doing well, thank you. How can I help you?",
+                        "Hi! Everything is fine. What can I do for you today?",
+                        "Hello! I'm operational and ready to assist."
                     ]
                 else:
                     greeting_responses = [
-                        "Hallo! Mir geht es gut, danke der Nachfrage. Womit kann ich dir im E-Commerce Bereich helfen?",
-                        "Hi! Alles läuft gut bei mir. Was für eine Frage hast du zu Dropshipping, Facebook Ads oder Store-Optimierung?",
-                        "Hallo! Mir geht es bestens. Lass hören - wobei kann ich dir behilflich sein?"
+                        "Hallo! Mir geht es gut, danke. Wie kann ich Ihnen helfen?",
+                        "Hi! Alles in Ordnung. Was kann ich heute für Sie tun?",
+                        "Hallo! Ich bin einsatzbereit und stehe zur Verfügung."
                     ]
                 
                 import random
@@ -553,34 +540,26 @@ async def handle_auto_question_with_context(message, question):
             
             # Prompt mit professioneller, authentischer Persönlichkeit
             combined_knowledge = '\n\n'.join(relevant_chunks)
-            prompt = f"""Du bist Freedom, ein professioneller E-Commerce Experte mit authentischer, direkter Persönlichkeit. Du bist kompetent, hilfsbereit und ehrlich.
+            # Spracherkennung für die Antwortsprache (aus der Frage abgeleitet)
+            is_english = any(word in question.lower() for word in ['what', 'how', 'when', 'why', 'where', 'can', 'could', 'would', 'should', 'do', 'does', 'did', 'will', 'are', 'is', 'the', 'and', 'or', 'but'])
 
-PERSÖNLICHKEIT:
-- Professionell und sachkundig im E-Commerce Bereich
-- Authentisch und direkt, ohne unnötige Floskeln
-- Hilfsbereit und geduldig bei allen Fragen
-- Erinnerst dich an vorherige Gespräche
-- Keine Emojis oder übertriebene Ausdrücke
-- Fokussiert auf praktische, umsetzbare Lösungen
-- Ehrlich über Chancen und Risiken
+            prompt = f'''You are a helpful AI assistant.
 
-GESPRÄCHSKONTEXT:
+CONVERSATION CONTEXT:
 {context}
 
-EXPERTENWISSEN:
+AVAILABLE KNOWLEDGE (if any):
 {combined_knowledge}
 
-AKTUELLE FRAGE: {question}
+CURRENT QUESTION: {question}
 
-ANWEISUNGEN:
-- Erkenne die Sprache der Frage und antworte in derselben Sprache (Deutsch oder Englisch)
-- Verwende einen professionellen, klaren Stil ohne Emojis
-- Gehe spezifisch auf die gestellte Frage ein
-- Berücksichtige den Gesprächskontext vollständig
-- Wenn die Frage nicht E-Commerce bezogen ist: erkläre höflich, dass du auf E-Commerce spezialisiert bist
-- Bei Krypto/Trading-Fragen: erkläre, dass dein Expertise-Bereich E-Commerce und Dropshipping ist
-- Gib konkrete, praktische Handlungsempfehlungen
-- Bei Links oder externen Inhalten: erkläre was du siehst/nicht siehst"""
+INSTRUCTIONS:
+- Answer the user's question directly and clearly.
+- Use the provided knowledge if it's relevant to the question.
+- If the question is outside your capabilities or knowledge, politely say so.
+- Maintain a neutral and helpful tone.
+- Respond in the language of the current question (Detected: {'English' if is_english else 'German'}).
+- If the question involves links, state that you cannot open them but can discuss the text content if provided.'''
 
             # Gemini API Anfrage
             response = gemini_model.generate_content(prompt)
@@ -641,12 +620,35 @@ async def send_long_message_reply(message, text):
             await message.channel.send(chunk)
             await asyncio.sleep(1)
 
+# Function to load configuration into the global CONFIG_DETAILS
+def load_config_into_global():
+    global CONFIG_DETAILS # Declare that this function modifies the global CONFIG_DETAILS
+
+    loaded_config = {}
+    try:
+        with open('config.json', 'r') as f:
+            loaded_config = json.load(f)
+        CONFIG_DETAILS.update(loaded_config) # Update the global dictionary
+    except FileNotFoundError:
+        logger.error("❌ config.json not found! Please create it with your API keys and token. See README for format.")
+        # CONFIG_DETAILS remains empty or partially updated
+    except json.JSONDecodeError:
+        logger.error("❌ Error decoding config.json! Please check its format.")
+        # CONFIG_DETAILS remains empty or partially updated
+
 if __name__ == "__main__":
-    # Discord Token prüfen
-    token = os.getenv('DISCORD_TOKEN')
-    if not token:
-        logger.error("❌ DISCORD_TOKEN nicht gefunden!")
-        exit(1)
-    
-    logger.info("🚀 Starte Enhanced Bot mit Kontext & Vision...")
-    bot.run(token)
+    load_config_into_global() # Populate CONFIG_DETAILS
+
+    # Now, only read from CONFIG_DETAILS in this scope
+    discord_token = CONFIG_DETAILS.get('DISCORD_TOKEN')
+
+    if not discord_token:
+        logger.error("❌ DISCORD_TOKEN not found in config.json! The bot requires this to start.")
+        exit(1) # Critical error, bot cannot start
+
+    # GEMINI_API_KEY presence (or absence) is handled in on_ready.
+    # If config.json was not found or was invalid, CONFIG_DETAILS might be empty
+    # or lack GEMINI_API_KEY, which on_ready will handle.
+
+    logger.info("🚀 Starting Bot...")
+    bot.run(discord_token)
