@@ -4,7 +4,7 @@ A sophisticated Discord bot powered by Google Gemini AI. In This Branch featurin
 
 ## Features
 
-- **Eddie's Authentic Personality**: Direct, no-bullshit responses like the real Eddie
+- **Authentic Personality**: Direct, no-bullshit and real responses.
 - **Comprehensive Knowledge Base**: 23 files covering dropshipping, Facebook ads, customer support
 - **Multi-language Support**: Automatically detects and responds in German or English
 - **Context Management**: Remembers conversation history for better responses
@@ -47,17 +47,16 @@ A sophisticated Discord bot powered by Google Gemini AI. In This Branch featurin
 - Content creation and UGC strategies
 - Gray-hat methods and controversial tactics
 
-## Eddie's Teaching Style
+## Teaching Style
 
 - Direct and authentic communication
 - Sometimes blunt when addressing basic questions
-- Calls community members "hustlers"
 - Zero patience for quick-money schemes without work
 - Proud of practical, results-driven methods
 
 ## Commands
 
-- `!frage [question]` - Ask Eddie anything about e-commerce
+- `!frage [question]` - Ask the bot anything about e-commerce
 - `!info` - View bot information and capabilities
 - `!themen` - See available knowledge topics
 - `@Eddie [message]` - Direct mention for questions or image analysis
